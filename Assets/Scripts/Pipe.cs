@@ -1,19 +1,26 @@
-﻿using System.Collections;
+﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+
+
+//TODO: Update whole class.
 
 
 /// <summary>
 /// A PVC pipe.
 /// </summary>
-public class Pipe : MonoBehaviour
+[ExecuteInEditMode]
+public class Pipe : PVCItem
 {
 	/// <summary>
 	/// The connectors that this pipe uses.
 	/// A "null" value indicates that it isn't connected to anything on that end.
 	/// </summary>
-	[HideInInspector]
 	public Transform C1, C2;
+
+	public Vector3 P1 { get { return MyTr.position; } }
+	public Vector3 P2 { get { return MyTr.position + (MyTr.forward * MyTr.localScale.z); } }
 
 
 	/// <summary>
@@ -30,21 +37,19 @@ public class Pipe : MonoBehaviour
 		if (C1 == null && C2 == null)
 			return;
 
-		Transform tr = transform;
-
 		if (C1 == null || C2 == null)
 		{
 			var singleConnector = (C1 == null) ? C2 : C1;
-			tr.position = singleConnector.position;
-			tr.forward = singleConnector.forward;
-			tr.localScale = new Vector3(1.0f, 1.0f, length);
+			MyTr.position = singleConnector.position;
+			MyTr.forward = singleConnector.forward;
+			MyTr.localScale = new Vector3(1.0f, 1.0f, length);
 			return;
 		}
 
-		tr.position = C1.position;
+		MyTr.position = C1.position;
 		Vector3 toC2 = C2.position - C1.position;
 		float pipeLen = toC2.magnitude;
-		tr.forward = toC2 / pipeLen;
-		tr.localScale = new Vector3(1.0f, 1.0f, pipeLen);
+		MyTr.forward = toC2 / pipeLen;
+		MyTr.localScale = new Vector3(1.0f, 1.0f, pipeLen);
 	}
 }
