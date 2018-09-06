@@ -30,9 +30,9 @@ public class Connector90 : PVCItem
 
 
 	[SerializeField]
-	private MouthData[] mouthData;
+	private MouthData[] mouthData = new MouthData[0];
 
-	private Mouth[] mouths;
+	private Mouth[] mouths = new Mouth[0];
 
 
 	public void RebuildMouthList()
@@ -47,6 +47,8 @@ public class Connector90 : PVCItem
 	}
 	public override void UpdateTransform()
 	{
+		//TODO: Parent all siblings to this item. Then run the code below, but temporarily unparent the item this connector is adjusting to. Then, reparent all siblings to the group.
+
 		for (int i = 0; i < mouths.Length; ++i)
 		{
 			if (mouths[i].IsConnected)
@@ -59,32 +61,35 @@ public class Connector90 : PVCItem
 
 				if (myMouthPos != otherMouthPos)
 				{
-					Vector3 toOther = (otherMouthPos - myMouthPos).normalized;
+					Vector3 toOther = (otherMouthPos - myMouthPos),
+						    toOtherN = toOther.normalized;
 					switch (mouthData[i].Dir)
 					{
 						case Directions.Forward:
-							MyTr.forward = toOther;
+							MyTr.forward = toOtherN;
 							break;
 						case Directions.Backward:
-							MyTr.forward = -toOther;
+							MyTr.forward = -toOtherN;
 							break;
 
 						case Directions.Right:
-							MyTr.right = toOther;
+							MyTr.right = toOtherN;
 							break;
 						case Directions.Left:
-							MyTr.right = -toOther;
+							MyTr.right = -toOtherN;
 							break;
 
 						case Directions.Up:
-							MyTr.up = toOther;
+							MyTr.up = toOtherN;
 							break;
 						case Directions.Down:
-							MyTr.up = -toOther;
+							MyTr.up = -toOtherN;
 							break;
 
 						default: throw new NotImplementedException();
 					}
+
+					MyTr.position += toOther;
 				}
 			}
 		}

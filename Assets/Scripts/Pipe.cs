@@ -6,10 +6,20 @@ using UnityEngine;
 
 public class Pipe : PVCItem
 {
-	private Mouth[] mouths = new Mouth[2];
+	[SerializeField]
+	private Transform mouth1, mouth2;
+	[SerializeField]
+	private Transform bodyTr;
+
+	private Mouth[] mouths = new Mouth[2] { new Mouth(), new Mouth() };
 
 	public override IReadOnlyList<Mouth> Mouths { get { return mouths; } }
 
+	public void RebuildMouthList()
+	{
+		mouths[0] = new Mouth() { MyTr = mouth1, Name = "C1" };
+		mouths[1] = new Mouth() { MyTr = mouth2, Name = "C2" };
+	}
 	public override void UpdateTransform()
 	{
 		if (!mouths[0].IsConnected && !mouths[1].IsConnected)
@@ -27,6 +37,6 @@ public class Pipe : PVCItem
 		Vector3 toC2 = mouths[1].MyTr.position - mouths[0].MyTr.position;
 		float pipeLen = toC2.magnitude;
 		MyTr.forward = toC2 / pipeLen;
-		MyTr.localScale = new Vector3(1.0f, 1.0f, pipeLen);
+		bodyTr.localScale = new Vector3(1.0f, 1.0f, pipeLen);
 	}
 }

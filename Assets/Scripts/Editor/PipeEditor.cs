@@ -5,8 +5,8 @@ using UnityEngine;
 using UnityEditor;
 
 
-[CustomEditor(typeof(Connector90))]
-public class Connector90Editor : PVCItemEditor
+[CustomEditor(typeof(Pipe))]
+public class PipeEditor : PVCItemEditor
 {
 	protected override void CustomInspectorGUI()
 	{
@@ -15,7 +15,7 @@ public class Connector90Editor : PVCItemEditor
 		EditorGUI.BeginChangeCheck();
 		DrawDefaultInspector();
 		if (EditorGUI.EndChangeCheck())
-			((Connector90)target).RebuildMouthList();
+			((Pipe)target).RebuildMouthList();
 
 		GUILayout.Space(20.0f);
 	}

@@ -42,7 +42,7 @@ public class PVCItemEditor : Editor
 				if (mouth.IsConnected)
 				{
 					GUILayout.BeginHorizontal();
-					if (GUILayout.Button("Disconnect " + mouth.Name))
+					if (GUILayout_CompactButton("Disconnect " + mouth.Name))
 					{
 						mouth.ConnectedMouth.OtherItem = null;
 						mouth.OtherItem = null;
@@ -79,7 +79,7 @@ public class PVCItemEditor : Editor
 							}
 						}
 					}
-					if (GUILayout.Button("Reconnect " + mouth.Name))
+					if (GUILayout_CompactButton("Reconnect " + mouth.Name))
 					{
 						mouth.OtherItem = null;
 						ItemBeingConnected = myItem;
@@ -89,7 +89,7 @@ public class PVCItemEditor : Editor
 				}
 				else
 				{
-					if (GUILayout.Button("Connect " + mouth.Name))
+					if (GUILayout_CompactButton("Connect " + mouth.Name))
 					{
 						ItemBeingConnected = myItem;
 						ConnectIndex = mouthI;
@@ -99,6 +99,15 @@ public class PVCItemEditor : Editor
 		}
 	}
 	protected virtual void CustomInspectorGUI() { }
+	private bool GUILayout_CompactButton(string label)
+	{
+		GUILayout.BeginHorizontal();
+		GUILayout.FlexibleSpace();
+		bool result = GUILayout.Button(label);
+		GUILayout.FlexibleSpace();
+		GUILayout.EndHorizontal();
+		return result;
+	}
 
 	private void OnSceneGUI()
 	{
