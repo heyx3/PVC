@@ -5,14 +5,11 @@ using UnityEngine;
 using UnityEditor;
 
 
-//TODO: Connected pieces are siblings in the hierarchy. When connecting two things, merge their siblings to all be one big family.
-
-
 [CustomEditor(typeof(PVCItem))]
 public class PVCItemEditor : Editor
 {
 	public static PVCItem ItemBeingConnected { get; private set; }
-	private static int ConnectIndex = 1;
+	protected static int ConnectIndex = 1;
 
 
 	public override void OnInspectorGUI()
@@ -24,42 +21,85 @@ public class PVCItemEditor : Editor
 		}
 
 		var myItem = (PVCItem)target;
+
+		CustomInspectorGUI();
+
 		if (myItem == ItemBeingConnected)
 		{
 			GUILayout.Label("Click the mouth to connect to in the Scene view");
 			if (GUILayout.Button("Cancel"))
 				ItemBeingConnected = null;
 		}
-		UnityEngine.Assertions.Assert.IsNull(ItemBeingConnected,
-											 "Other item is still being connected??");
-
-		//Do the GUI for each item (i.e. ask to connect or disconnect).
-		for (int i = 0; i < myItem.Mouths.Count; ++i)
+		else
 		{
-			var mouth = myItem.Mouths[i];
-			if (mouth.IsConnected)
+			UnityEngine.Assertions.Assert.IsNull(ItemBeingConnected,
+												 "Other item is still being connected??");
+
+			//Do the GUI for each item (i.e. ask to connect or disconnect).
+			for (int mouthI = 0; mouthI < myItem.Mouths.Count; ++mouthI)
 			{
-				GUILayout.BeginHorizontal();
-				if (GUILayout.Button("Disconnect " + mouth.Name))
-					mouth.OtherItem = null;
-				if (GUILayout.Button("Reconnect " + mouth.Name))
+				var mouth = myItem.Mouths[mouthI];
+				if (mouth.IsConnected)
 				{
-					mouth.OtherItem = null;
-					ItemBeingConnected = myItem;
-					ConnectIndex = i;
+					GUILayout.BeginHorizontal();
+					if (GUILayout.Button("Disconnect " + mouth.Name))
+					{
+						mouth.ConnectedMouth.OtherItem = null;
+						mouth.OtherItem = null;
+
+						//Find all siblings that still connect to this item.
+						var connectedObjs = new HashSet<GameObject>();
+						var toSearch = new Stack<PVCItem>();
+						toSearch.Push(myItem);
+						while (toSearch.Count > 0)
+						{
+							var item = toSearch.Pop();
+							if (!connectedObjs.Contains(item.gameObject))
+							{
+								connectedObjs.Add(item.gameObject);
+								foreach (var itemMouth in item.Mouths)
+									if (itemMouth.IsConnected)
+										toSearch.Push(itemMouth.OtherItem);
+							}
+						}
+
+						//Take any siblings that aren't connected to this item
+						//    and move them to a new group.
+						Transform myParent = myItem.MyTr.parent,
+								  newParent = null;
+						for (int childI = 0; childI < myParent.childCount; ++childI)
+						{
+							if (!connectedObjs.Contains(myParent.GetChild(childI).gameObject))
+							{
+								if (newParent == null)
+									newParent = new GameObject("Group").transform;
+
+								myParent.GetChild(childI).SetParent(newParent, true);
+								childI -= 1;
+							}
+						}
+					}
+					if (GUILayout.Button("Reconnect " + mouth.Name))
+					{
+						mouth.OtherItem = null;
+						ItemBeingConnected = myItem;
+						ConnectIndex = mouthI;
+					}
+					GUILayout.EndHorizontal();
 				}
-				GUILayout.EndHorizontal();
-			}
-			else
-			{
-				if (GUILayout.Button("Connect " + mouth.Name))
+				else
 				{
-					ItemBeingConnected = myItem;
-					ConnectIndex = i;
+					if (GUILayout.Button("Connect " + mouth.Name))
+					{
+						ItemBeingConnected = myItem;
+						ConnectIndex = mouthI;
+					}
 				}
 			}
 		}
 	}
+	protected virtual void CustomInspectorGUI() { }
+
 	private void OnSceneGUI()
 	{
 		if (targets.Length != 1)
@@ -110,15 +150,22 @@ public class PVCItemEditor : Editor
 					itemsBeingChanged.AddRange(GetHierarchyFromRoot(parent2));
 				Undo.RecordObjects(itemsBeingChanged.ToArray(),
 								   "Connect " + myItem.gameObject.name + " to " +
-								       selectedPvcItem.gameObject.name);
+									   selectedPvcItem.gameObject.name);
 
 				//Make the connection.
 				myItem.Mouths[ConnectIndex].OtherItem = selectedPvcItem;
 				myItem.Mouths[ConnectIndex].OtherItemMouthI = selectedMouthI;
 				selectedPvcItem.Mouths[selectedMouthI].OtherItem = myItem;
 				selectedPvcItem.Mouths[selectedMouthI].OtherItemMouthI = ConnectIndex;
+				myItem.UpdateTransform();
 
-				//TODO: Combine the two groups of Transforms into one.
+				//Merge the groups.
+				if (parent1 != parent2)
+				{
+					while (parent2.childCount > 0)
+						parent2.GetChild(0).SetParent(parent1, true);
+					Destroy(parent2.gameObject);
+				}
 			}
 		}
 	}

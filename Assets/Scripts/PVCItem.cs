@@ -23,6 +23,7 @@ public abstract class PVCItem : MonoBehaviour
 		public int OtherItemMouthI;
 
 		public bool IsConnected { get { return OtherItem != null; } }
+		public Mouth ConnectedMouth { get { return OtherItem.Mouths[OtherItemMouthI]; } }
 	}
 
 
@@ -34,13 +35,14 @@ public abstract class PVCItem : MonoBehaviour
 	public abstract IReadOnlyList<Mouth> Mouths { get; }
 	/// <summary>
 	/// The types of GameObjects that this item can connect to.
+	/// Default behavior: returns the inverse of this GameObject's layer (i.e. every other layer).
 	/// </summary>
-	public abstract LayerMask CompatibleObjects { get; }
+	public virtual LayerMask CompatibleObjects { get { return ~gameObject.layer; } }
 
 	/// <summary>
-	/// Connects the given item's mouth to this item's given mouth.
+	/// Tells this item to update its Transform so that it's touching its connections correctly.
 	/// </summary>
-	public abstract void Connect(int myMouthI, PVCItem item, int otherMouthI);
+	public abstract void UpdateTransform();
 
 	protected virtual void Awake()
 	{
