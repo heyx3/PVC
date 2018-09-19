@@ -19,4 +19,11 @@ public class PipeEditor : PVCItemEditor
 
 		GUILayout.Space(20.0f);
 	}
+
+	[UnityEditor.Callbacks.DidReloadScripts]
+	private static void OnRecompiled()
+	{
+		foreach (var pipe in FindObjectsOfType<Pipe>())
+			pipe.RebuildMouthList();
+	}
 }

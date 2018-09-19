@@ -19,4 +19,11 @@ public class Connector90Editor : PVCItemEditor
 
 		GUILayout.Space(20.0f);
 	}
+
+	[UnityEditor.Callbacks.DidReloadScripts]
+	private static void OnRecompiled()
+	{
+		foreach (var con90 in FindObjectsOfType<Connector90>())
+			con90.RebuildMouthList();
+	}
 }

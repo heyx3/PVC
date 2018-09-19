@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEditor;
 
 
+[ExecuteInEditMode]
 [CustomEditor(typeof(PVCItem))]
 public class PVCItemEditor : Editor
 {
@@ -29,6 +30,9 @@ public class PVCItemEditor : Editor
 			GUILayout.Label("Click the mouth to connect to in the Scene view");
 			if (GUILayout.Button("Cancel"))
 				ItemBeingConnected = null;
+
+			//Force the scene GUI to be repainted every frame so it can catch mouse events.
+			Repaint();
 		}
 		else
 		{
@@ -109,7 +113,7 @@ public class PVCItemEditor : Editor
 		return result;
 	}
 
-	private void OnSceneGUI()
+	protected virtual void OnSceneGUI()
 	{
 		if (targets.Length != 1)
 			return;
@@ -120,34 +124,14 @@ public class PVCItemEditor : Editor
 
 		var mouth = myItem.Mouths[ConnectIndex];
 
-		//Draw a sphere around the end being connected.
-		Gizmos.color = new Color(0.25f, 1.0f, 0.25f, 0.325f);
-		Gizmos.DrawSphere(mouth.MyTr.position, 1.0f);
-
 		//See if a compatible item is being moused over.
-		var mouseRay = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
-		RaycastHit hit;
-		if (Physics.Raycast(mouseRay, out hit, float.PositiveInfinity,
-							myItem.CompatibleObjects))
+		PVCItem selectedPvcItem;
+		int selectedMouthI;
+		FindMousedOverItem(myItem.CompatibleObjects, out selectedPvcItem, out selectedMouthI);
+		if (selectedMouthI >= 0)
 		{
-			var selectedPvcItem = hit.collider.GetComponentInParent<PVCItem>();
-			UnityEngine.Assertions.Assert.IsNotNull(selectedPvcItem,
-													"Hit something that wasn't a PVC item??");
-
-			int selectedMouthI = -1;
-			for (int i = 0; i < selectedPvcItem.Mouths.Count; ++i)
-				if (hit.transform.IsChildOf(selectedPvcItem.Mouths[i].MyTr))
-				{
-					selectedMouthI = i;
-					break;
-				}
-			var selectedMouth = selectedPvcItem.Mouths[selectedMouthI];
-
-			//Draw a sphere around the mouth.
-			Gizmos.color = new Color(1.0f, 0.25f, 0.25f, 0.325f);
-			Gizmos.DrawSphere(selectedMouth.MyTr.position, 1.0f);
-
 			//If the mouse clicks, choose the connector mouth.
+			//TODO: Find the right way to respond to mouse input events on the scene.
 			if (Input.GetMouseButtonDown(0))
 			{
 				//Push the state onto the Undo stack before modifying it.
@@ -179,12 +163,69 @@ public class PVCItemEditor : Editor
 		}
 	}
 
+	//TODO: Gizmos are fucked in custom inspectors. Try using actual sphere GameObjects.
+	[DrawGizmo(GizmoType.Selected | GizmoType.Active)]
+	private static void OnDrawGizmos(PVCItem pvc, GizmoType gizType)
+	{
+		if (pvc != ItemBeingConnected)
+			return;
+
+		var mouth = pvc.Mouths[ConnectIndex];
+
+		//Draw a sphere around the end being connected.
+		Gizmos.color = new Color(0.25f, 1.0f, 0.25f, 0.325f);
+		Gizmos.DrawSphere(mouth.MyTr.position, 1.0f);
+
+		//See if a compatible item is being moused over.
+		PVCItem selectedPvcItem;
+		int selectedMouthI;
+		FindMousedOverItem(pvc.CompatibleObjects, out selectedPvcItem, out selectedMouthI);
+		if (selectedMouthI >= 0)
+		{
+			//Draw a sphere around the mouth.
+			Gizmos.color = new Color(1.0f, 0.25f, 0.25f, 0.325f);
+			Gizmos.DrawSphere(selectedPvcItem.Mouths[selectedMouthI].MyTr.position, 1.0f);
+
+			SceneView.RepaintAll();
+		}
+	}
+
+	public override bool RequiresConstantRepaint()
+	{
+		return (target != null) && ((PVCItem)target) == ItemBeingConnected;
+	}
+
 	private void OnDestroy()
 	{
 		if (target != null && ItemBeingConnected == (PVCItem)target)
 			ItemBeingConnected = null;
 	}
 
+
+	private static void FindMousedOverItem(LayerMask compatibleObjects,
+										   out PVCItem selectedItem, out int selectedMouthIndex)
+	{
+		selectedItem = null;
+		selectedMouthIndex = -1;
+
+		var mouseRay = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
+		RaycastHit hit;
+		if (Physics.Raycast(mouseRay, out hit, float.PositiveInfinity, compatibleObjects))
+		{
+			//Get the PVC item that was hit.
+			selectedItem = hit.collider.GetComponentInParent<PVCItem>();
+			UnityEngine.Assertions.Assert.IsNotNull(selectedItem,
+													"Hit something that wasn't a PVC item??");
+
+			//Get the specific mouth that was hit.
+			for (int i = 0; i < selectedItem.Mouths.Count; ++i)
+				if (hit.transform.IsChildOf(selectedItem.Mouths[i].MyTr))
+				{
+					selectedMouthIndex = i;
+					break;
+				}
+		}
+	}
 	/// <summary>
 	/// Gets all Transforms in the given hierarchy.
 	/// The first item returned is the parameter itself;

@@ -73,7 +73,7 @@ public class Connector90 : PVCItem
 
 				if (myMouthPos != otherMouthPos)
 				{
-					//TODO: "temporarily unparent myMouthTr"?
+					//TODO: Unparent the other mouth if its PVCItem was a sibling of this one (which would mean it currently is a child of this connector).
 
 					Vector3 toOther = (otherMouthPos - myMouthPos),
 						    toOtherN = toOther.normalized;

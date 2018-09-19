@@ -20,7 +20,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4081158185337364}
   - component: {fileID: 114968786977076976}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Pipe
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -35,7 +35,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4207334387242668}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Body End
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -52,7 +52,7 @@ GameObject:
   - component: {fileID: 4103665350595608}
   - component: {fileID: 33947789050708418}
   - component: {fileID: 23645338515970284}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Body Mesh
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -67,7 +67,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4887106584280270}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Body Root
   m_TagString: Untagged
   m_Icon: {fileID: 0}

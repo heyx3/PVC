@@ -4,6 +4,7 @@ using System.Linq;
 using UnityEngine;
 
 
+[ExecuteInEditMode]
 public class Pipe : PVCItem
 {
 	[SerializeField]
@@ -11,6 +12,8 @@ public class Pipe : PVCItem
 	[SerializeField]
 	private Transform bodyTr;
 
+	[SerializeField]
+	[HideInInspector]
 	private Mouth[] mouths = new Mouth[2] { new Mouth(), new Mouth() };
 
 	public override IReadOnlyList<Mouth> Mouths { get { return mouths; } }
