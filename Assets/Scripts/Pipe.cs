@@ -39,4 +39,10 @@ public class Pipe : PVCItem
 		MyTr.forward = toC2 / pipeLen;
 		bodyTr.localScale = new Vector3(1.0f, 1.0f, pipeLen);
 	}
+
+	protected override void Awake()
+	{
+		base.Awake();
+		RebuildMouthList();
+	}
 }

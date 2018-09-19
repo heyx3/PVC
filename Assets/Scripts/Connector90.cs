@@ -47,8 +47,20 @@ public class Connector90 : PVCItem
 	}
 	public override void UpdateTransform()
 	{
-		//TODO: Parent all siblings to this item. Then run the code below, but temporarily unparent the item this connector is adjusting to. Then, reparent all siblings to the group.
+		//Temporarily parent all siblings to this item so that they update alongside it.
+		List<Transform> siblings = new List<Transform>(MyTr.parent.childCount - 1);
+		for (int i = 0; i < MyTr.parent.childCount; ++i)
+		{
+			var siblingTr = MyTr.parent.GetChild(i);
+			if (siblingTr != MyTr)
+			{
+				siblings.Add(siblingTr);
+				siblingTr.SetParent(MyTr, true);
+				i -= 1;
+			}
+		}
 
+		//Rotate this connector based on its connections.
 		for (int i = 0; i < mouths.Length; ++i)
 		{
 			if (mouths[i].IsConnected)
@@ -61,6 +73,8 @@ public class Connector90 : PVCItem
 
 				if (myMouthPos != otherMouthPos)
 				{
+					//TODO: "temporarily unparent myMouthTr"?
+
 					Vector3 toOther = (otherMouthPos - myMouthPos),
 						    toOtherN = toOther.normalized;
 					switch (mouthData[i].Dir)
@@ -93,5 +107,17 @@ public class Connector90 : PVCItem
 				}
 			}
 		}
+
+		//Re-parent all siblings to this group.
+		foreach (var siblingTr in siblings)
+		{
+			siblingTr.SetParent(MyTr.parent, true);
+		}
+	}
+
+	protected override void Awake()
+	{
+		base.Awake();
+		RebuildMouthList();
 	}
 }
