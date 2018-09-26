@@ -119,8 +119,14 @@ public class PVCItemEditor : Editor
 			return;
 
 		var myItem = (PVCItem)target;
+
+		//Only need to do scene GUI stuff if this item is being connected to something.
 		if (myItem != ItemBeingConnected)
 			return;
+
+		//Intercept mouse events.
+		if (Event.current.type == EventType.Layout)
+			HandleUtility.AddDefaultControl(0);
 
 		var mouth = myItem.Mouths[ConnectIndex];
 
@@ -141,7 +147,7 @@ public class PVCItemEditor : Editor
 
 			//If the mouse clicks, choose the connector mouth.
 			//TODO: Find the right way to respond to mouse input events on the scene.
-			if (Input.GetMouseButtonDown(0))
+			if (Event.current.type == EventType.MouseUp && Event.current.button == 0)
 			{
 				//Push the state onto the Undo stack before modifying it.
 				var itemsBeingChanged = new List<UnityEngine.Object>();
@@ -159,14 +165,14 @@ public class PVCItemEditor : Editor
 				myItem.Mouths[ConnectIndex].OtherItemMouthI = selectedMouthI;
 				selectedPvcItem.Mouths[selectedMouthI].OtherItem = myItem;
 				selectedPvcItem.Mouths[selectedMouthI].OtherItemMouthI = ConnectIndex;
-				myItem.UpdateTransform();
+				myItem.UpdateTransform(); //TODO: This doesn't do anything when connecting pipe to connector.
 
 				//Merge the groups.
 				if (parent1 != parent2)
 				{
 					while (parent2.childCount > 0)
 						parent2.GetChild(0).SetParent(parent1, true);
-					Destroy(parent2.gameObject);
+					DestroyImmediate(parent2.gameObject);
 				}
 			}
 		}
