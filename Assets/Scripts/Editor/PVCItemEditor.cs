@@ -124,12 +124,21 @@ public class PVCItemEditor : Editor
 
 		var mouth = myItem.Mouths[ConnectIndex];
 
+		//Draw a sphere around the end being connected.
+		PersistentGizmos.Sphere(myItem, 0, mouth.MyTr.position, 1.0f,
+								new Color(0.25f, 1.0f, 0.25f, 0.325f));
+
 		//See if a compatible item is being moused over.
 		PVCItem selectedPvcItem;
 		int selectedMouthI;
 		FindMousedOverItem(myItem.CompatibleObjects, out selectedPvcItem, out selectedMouthI);
 		if (selectedMouthI >= 0)
 		{
+			//Draw a sphere around the mouth.
+			PersistentGizmos.Sphere(myItem, 1,
+									selectedPvcItem.Mouths[selectedMouthI].MyTr.position, 1.0f,
+									new Color(1.0f, 0.25f, 0.25f, 0.325f));
+
 			//If the mouse clicks, choose the connector mouth.
 			//TODO: Find the right way to respond to mouse input events on the scene.
 			if (Input.GetMouseButtonDown(0))
@@ -163,33 +172,6 @@ public class PVCItemEditor : Editor
 		}
 	}
 
-	//TODO: Gizmos are fucked in custom inspectors. Try using actual sphere GameObjects.
-	[DrawGizmo(GizmoType.Selected | GizmoType.Active)]
-	private static void OnDrawGizmos(PVCItem pvc, GizmoType gizType)
-	{
-		if (pvc != ItemBeingConnected)
-			return;
-
-		var mouth = pvc.Mouths[ConnectIndex];
-
-		//Draw a sphere around the end being connected.
-		Gizmos.color = new Color(0.25f, 1.0f, 0.25f, 0.325f);
-		Gizmos.DrawSphere(mouth.MyTr.position, 1.0f);
-
-		//See if a compatible item is being moused over.
-		PVCItem selectedPvcItem;
-		int selectedMouthI;
-		FindMousedOverItem(pvc.CompatibleObjects, out selectedPvcItem, out selectedMouthI);
-		if (selectedMouthI >= 0)
-		{
-			//Draw a sphere around the mouth.
-			Gizmos.color = new Color(1.0f, 0.25f, 0.25f, 0.325f);
-			Gizmos.DrawSphere(selectedPvcItem.Mouths[selectedMouthI].MyTr.position, 1.0f);
-
-			SceneView.RepaintAll();
-		}
-	}
-
 	public override bool RequiresConstantRepaint()
 	{
 		return (target != null) && ((PVCItem)target) == ItemBeingConnected;
@@ -199,6 +181,8 @@ public class PVCItemEditor : Editor
 	{
 		if (target != null && ItemBeingConnected == (PVCItem)target)
 			ItemBeingConnected = null;
+
+		PersistentGizmos.CleanUp(target);
 	}
 
 
