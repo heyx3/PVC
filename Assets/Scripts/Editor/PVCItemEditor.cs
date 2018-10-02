@@ -102,7 +102,11 @@ public class PVCItemEditor : Editor
 			}
 		}
 	}
-	protected virtual void CustomInspectorGUI() { }
+	protected virtual void CustomInspectorGUI()
+	{
+		DrawDefaultInspector();
+		GUILayout.Space(20.0f);
+	}
 	private bool GUILayout_CompactButton(string label)
 	{
 		GUILayout.BeginHorizontal();
@@ -146,7 +150,6 @@ public class PVCItemEditor : Editor
 									new Color(1.0f, 0.25f, 0.25f, 0.325f));
 
 			//If the mouse clicks, choose the connector mouth.
-			//TODO: Find the right way to respond to mouse input events on the scene.
 			if (Event.current.type == EventType.MouseUp && Event.current.button == 0)
 			{
 				//Push the state onto the Undo stack before modifying it.
@@ -156,16 +159,16 @@ public class PVCItemEditor : Editor
 				var parent2 = selectedPvcItem.MyTr.parent;
 				if (parent2 != parent1)
 					itemsBeingChanged.AddRange(GetHierarchyFromRoot(parent2));
-				Undo.RecordObjects(itemsBeingChanged.ToArray(),
-								   "Connect " + myItem.gameObject.name + " to " +
-									   selectedPvcItem.gameObject.name);
 
 				//Make the connection.
-				myItem.Mouths[ConnectIndex].OtherItem = selectedPvcItem;
-				myItem.Mouths[ConnectIndex].OtherItemMouthI = selectedMouthI;
+				//TODO: Doesn't always work?
 				selectedPvcItem.Mouths[selectedMouthI].OtherItem = myItem;
 				selectedPvcItem.Mouths[selectedMouthI].OtherItemMouthI = ConnectIndex;
-				myItem.UpdateTransform(); //TODO: This doesn't do anything when connecting pipe to connector.
+				var prop_thisMouth = serializedObject.FindProperty("mouths").GetArrayElementAtIndex(ConnectIndex);
+				prop_thisMouth.FindPropertyRelative("OtherItem").objectReferenceValue = selectedPvcItem;
+				prop_thisMouth.FindPropertyRelative("OtherItemMouthI").intValue = selectedMouthI;
+				//myItem.Mouths[ConnectIndex].OtherItem = selectedPvcItem;
+				//myItem.Mouths[ConnectIndex].OtherItemMouthI = selectedMouthI;
 
 				//Merge the groups.
 				if (parent1 != parent2)
@@ -174,6 +177,13 @@ public class PVCItemEditor : Editor
 						parent2.GetChild(0).SetParent(parent1, true);
 					DestroyImmediate(parent2.gameObject);
 				}
+
+				//Clean up.
+				ItemBeingConnected = null;
+				PersistentGizmos.CleanUp(myItem);
+				serializedObject.ApplyModifiedProperties();
+				myItem.UpdateTransform();
+				Repaint();
 			}
 		}
 	}

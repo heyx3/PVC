@@ -182,6 +182,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bd8bded0141ec7343a59f17133829d46, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mouth1: {fileID: 4887106584280270}
-  mouth2: {fileID: 4207334387242668}
+  mouths:
+  - MyTr: {fileID: 4887106584280270}
+    Name: Start
+    OtherItem: {fileID: 0}
+    OtherItemMouthI: 0
+  - MyTr: {fileID: 4207334387242668}
+    Name: End
+    OtherItem: {fileID: 0}
+    OtherItemMouthI: 0
   bodyTr: {fileID: 4887106584280270}

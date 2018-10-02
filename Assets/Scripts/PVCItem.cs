@@ -14,6 +14,7 @@ public abstract class PVCItem : MonoBehaviour
 	/// <summary>
 	/// A part on this item that connects to another part.
 	/// </summary>
+	[Serializable]
 	public class Mouth
 	{
 		public Transform MyTr;
@@ -24,7 +25,15 @@ public abstract class PVCItem : MonoBehaviour
 
 		public bool IsConnected { get { return OtherItem != null; } }
 		public Mouth ConnectedMouth { get { return OtherItem.Mouths[OtherItemMouthI]; } }
+
+		public override string ToString()
+		{
+			return Name + "\t" + (OtherItem == null ? "null" : OtherItem.gameObject.name);
+		}
 	}
+
+	[SerializeField]
+	protected Mouth[] mouths;
 
 
 	public Transform MyTr { get; private set; }
@@ -32,19 +41,20 @@ public abstract class PVCItem : MonoBehaviour
 	/// <summary>
 	/// Gets all mouths on this item.
 	/// </summary>
-	public abstract IReadOnlyList<Mouth> Mouths { get; }
+	public IReadOnlyList<Mouth> Mouths { get { return mouths; } }
 	/// <summary>
 	/// The types of GameObjects that this item can connect to.
 	/// Default behavior: returns the inverse of this GameObject's layer (i.e. every other layer).
 	/// </summary>
 	public virtual LayerMask CompatibleObjects { get { return ~gameObject.layer; } }
 
+
 	/// <summary>
 	/// Tells this item to update its Transform so that it's touching its connections correctly.
 	/// </summary>
 	public abstract void UpdateTransform();
 
-	protected virtual void Awake()
+	public virtual void Awake()
 	{
 		MyTr = transform;
 

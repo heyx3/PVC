@@ -56,7 +56,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4750123224729656}
   m_Layer: 9
-  m_Name: Mouth 4
+  m_Name: Back Mouth
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -140,7 +140,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4935378327653420}
   m_Layer: 9
-  m_Name: Mouth 1
+  m_Name: Forward Mouth
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -205,7 +205,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4480384380592550}
   m_Layer: 9
-  m_Name: Mouth 3
+  m_Name: Down Mouth
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -238,7 +238,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4939762156420804}
   m_Layer: 9
-  m_Name: Mouth 2
+  m_Name: Up Mouth
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -828,15 +828,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5cbe274b41e574e4f8993a2e1078fff3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mouthData:
-  - Transform: {fileID: 4935378327653420}
-    Dir: 0
-  - Transform: {fileID: 4750123224729656}
-    Dir: 1
-  - Transform: {fileID: 4939762156420804}
-    Dir: 4
-  - Transform: {fileID: 4480384380592550}
-    Dir: 5
+  mouths:
+  - MyTr: {fileID: 4935378327653420}
+    Name: Forward
+    OtherItem: {fileID: 0}
+    OtherItemMouthI: 0
+  - MyTr: {fileID: 4939762156420804}
+    Name: Up
+    OtherItem: {fileID: 0}
+    OtherItemMouthI: 0
+  - MyTr: {fileID: 4480384380592550}
+    Name: Down
+    OtherItem: {fileID: 0}
+    OtherItemMouthI: 0
+  - MyTr: {fileID: 4750123224729656}
+    Name: Back
+    OtherItem: {fileID: 0}
+    OtherItemMouthI: 0
+  mouthDirs: 02000000010000000400000005000000
 --- !u!135 &135476650299363028
 SphereCollider:
   m_ObjectHideFlags: 1

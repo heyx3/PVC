@@ -11,42 +11,26 @@ public class Connector90 : PVCItem
 {
 	public enum Directions
 	{
-		Forward, Backward,
-		Left, Right,
-		Up, Down,
+		PosX, PosY, PosZ,
+		NegX, NegY, NegZ,
 
 		COUNT
 	}
 
-	[Serializable]
-	private struct MouthData
-	{
-		public Transform Transform;
-		public Directions Dir;
-	}
-
-
-	public override IReadOnlyList<Mouth> Mouths { get { return mouths; } }
-
-
 	[SerializeField]
-	private MouthData[] mouthData = new MouthData[0];
-
-	private Mouth[] mouths = new Mouth[0];
+	private Directions[] mouthDirs = new Directions[0];
 
 
-	public void RebuildMouthList()
-	{
-		mouths = new Mouth[mouthData.Length];
-		for (int i = 0; i < mouths.Length; ++i)
-			mouths[i] = new Mouth()
-			{
-				MyTr = mouthData[i].Transform,
-				Name = mouthData[i].Dir.ToString()
-			};
-	}
 	public override void UpdateTransform()
 	{
+		//Error-checking:
+		if (mouthDirs.Length != mouths.Length)
+		{
+			Debug.LogError("'mouthDirs' is not the same size as 'mouths'");
+			return;
+		}
+
+
 		//Temporarily parent all siblings to this item so that they update alongside it.
 		List<Transform> siblings = new List<Transform>(MyTr.parent.childCount - 1);
 		for (int i = 0; i < MyTr.parent.childCount; ++i)
@@ -77,26 +61,26 @@ public class Connector90 : PVCItem
 
 					Vector3 toOther = (otherMouthPos - myMouthPos),
 						    toOtherN = toOther.normalized;
-					switch (mouthData[i].Dir)
+					switch (mouthDirs[i])
 					{
-						case Directions.Forward:
+						case Directions.PosZ:
 							MyTr.forward = toOtherN;
 							break;
-						case Directions.Backward:
+						case Directions.NegZ:
 							MyTr.forward = -toOtherN;
 							break;
 
-						case Directions.Right:
+						case Directions.PosX:
 							MyTr.right = toOtherN;
 							break;
-						case Directions.Left:
+						case Directions.NegX:
 							MyTr.right = -toOtherN;
 							break;
 
-						case Directions.Up:
+						case Directions.PosY:
 							MyTr.up = toOtherN;
 							break;
-						case Directions.Down:
+						case Directions.NegY:
 							MyTr.up = -toOtherN;
 							break;
 
@@ -113,11 +97,5 @@ public class Connector90 : PVCItem
 		{
 			siblingTr.SetParent(MyTr.parent, true);
 		}
-	}
-
-	protected override void Awake()
-	{
-		base.Awake();
-		RebuildMouthList();
 	}
 }
